@@ -1,40 +1,28 @@
-# -*- coding: utf-8 -*-
+from telethon import TelegramClient, events
 import asyncio
-from telegram import Bot
+from telethon.sessions import StringSession
 
-# ===== CONFIG =====
-BOT_TOKEN = "8941847443:AAF78KW48MF93ntjK8ROGanD1TiEzc4O1_Q"
-SOURCE_CHANNEL = "@hamody_up4"
-TARGET_CHANNEL = "@DUHOK_CC"
-INTERVAL_SECONDS = 3
-# ==============================================
+# ========== ڕێکخستنەکان ==========
+api_id = 33790522
+api_hash = "00e4131295f55452e143c06099c1ddae"
+phone = "+96407504399022"  # ئەمە بگۆڕە بۆ ژمارەی مۆبایلی ڕاست
+# ===================================
 
-async def copy_and_send(bot, source, target):
-    try:
-        updates = await bot.get_updates()
-        if updates and updates[-1].channel_post:
-            last_post = updates[-1].channel_post
-            
-            # ئەگەر پەیامەکە وێنەی هەیە (send_photo)
-            if last_post.photo:
-                file_id = last_post.photo[-1].file_id
-                caption = last_post.caption or ""
-                await bot.send_photo(chat_id=target, photo=file_id, caption=caption)
-                print(f"✅ Copied photo + text to {target}!")
-            
-            # ئەگەر پەیامەکە تەنها دەقە (send_message)
-            elif last_post.text:
-                await bot.send_message(chat_id=target, text=last_post.text)
-                print(f"✅ Copied text to {target}!")
-                
-    except Exception as e:
-        print(f"❌ Error: {e}")
+SOURCE_CHANNEL = "@WarnisxCcScrap"
+TARGET_CHANNEL = "@Cc428Kurd"
+
+client = TelegramClient(StringSession(), api_id, api_hash)
 
 async def main():
-    bot = Bot(token=BOT_TOKEN)
-    while True:
-        await copy_and_send(bot, SOURCE_CHANNEL, TARGET_CHANNEL)
-        await asyncio.sleep(INTERVAL_SECONDS)
+    await client.start(phone)
+    print("✅ سەرکەوتووانە چووە ناوەوە!")
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    async for message in client.iter_messages(SOURCE_CHANNEL, limit=1):
+        if message.text:
+            await client.send_message(TARGET_CHANNEL, message.text)
+            print(f"✅ پەیام کۆپی کرا بۆ {TARGET_CHANNEL}!")
+        elif message.photo:
+            await client.send_file(TARGET_CHANNEL, message.photo, caption=message.caption)
+            print(f"✅ وێنە کۆپی کرا بۆ {TARGET_CHANNEL}!")
+
+asyncio.run(main())
