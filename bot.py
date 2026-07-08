@@ -14,8 +14,19 @@ async def copy_and_send(bot, source, target):
         updates = await bot.get_updates()
         if updates and updates[-1].channel_post:
             last_post = updates[-1].channel_post
-            await bot.send_message(chat_id=target, text=last_post.text)
-            print(f"✅ Copied and sent to {target}!")
+            
+            # ئەگەر پەیامەکە وێنەی هەیە (send_photo)
+            if last_post.photo:
+                file_id = last_post.photo[-1].file_id
+                caption = last_post.caption or ""
+                await bot.send_photo(chat_id=target, photo=file_id, caption=caption)
+                print(f"✅ Copied photo + text to {target}!")
+            
+            # ئەگەر پەیامەکە تەنها دەقە (send_message)
+            elif last_post.text:
+                await bot.send_message(chat_id=target, text=last_post.text)
+                print(f"✅ Copied text to {target}!")
+                
     except Exception as e:
         print(f"❌ Error: {e}")
 
