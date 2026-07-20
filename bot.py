@@ -12,16 +12,16 @@ TARGET_CHANNEL = "@kurdiraq7272"
 # ===================================
 
 def format_card_data(text):
-    # 1. دەستنیشانکردنی ژمارەی کارت (CC) بە شێوەی 16 ژمارە | مانگ | ساڵ | CVV
+    # دەستنیشانکردنی ژمارەی کارت
     cc_match = re.search(r'(\d{16})\|(\d{2})\|(\d{4})\|(\d{3,4})', text)
     if cc_match:
         cc, month, year, cvv = cc_match.groups()
-        bin_num = cc[:6]  # شەش ژمارەی یەکەم بە دەست دەکەوێت
+        bin_num = cc[:6]
     else:
-        # ئەگەر کارت نەدۆزرایەوە، هەمان دەقی ڕەسەن بەڵام بە سەرپەڕ و کۆتایی نوێ دەنێرێت
-        return f"KURD Scrapper by @kurdiraq7272\n\n{text}\n\nDeveloped By @kurdiraq7272"
+        # ئەگەر کارت نەدۆزرایەوە، سەرپەڕ و کۆتایی بە ناوی نوێ
+        return f"KURD Scrapper by @warven_24\n\n{text}\n\nDeveloped By @warven_24"
 
-    # 2. دەستنیشانکردنی Bank, Country, Type
+    # دەرهێنانی Bank, Country, Type
     bank_match = re.search(r'Bank:\s*(.+)', text, re.IGNORECASE)
     country_match = re.search(r'Country:\s*(.+)', text, re.IGNORECASE)
     type_match = re.search(r'Type:\s*(.+)', text, re.IGNORECASE)
@@ -30,8 +30,8 @@ def format_card_data(text):
     country = country_match.group(1).strip() if country_match else "N/A"
     card_type = type_match.group(1).strip() if type_match else "N/A"
 
-    # 3. دروستکردنی فۆرماتی خوازراو (هەمان شێوازی وێنەکە)
-    formatted = f"""KURD Scrapper by @kurdiraq7272
+    # فۆرماتی نوێ، تەنها ناوی `@warven_24` لە سەرپەڕ و کۆتاییدا
+    formatted = f"""KURD Scrapper by @warven_24
 
 CC: `{cc}|{month}|{year}|{cvv}`
 BIN: `{bin_num}`
@@ -39,9 +39,9 @@ Bank: {bank}
 Country: {country}
 Type: {card_type}
 
-Developed By @kurdiraq7272"""
+Developed By @warven_24"""
 
-    # ئەگەر لە کۆتایی دەقەکەدا ژمارە یان کات هەبوو (وەک "116 5:56 PM")، زیادیشی بکە
+    # ئەگەر کات لە کۆتاییدا هەبوو، زیادیشی بکە
     extra_match = re.search(r'(\d+\s+\d+:\d+\s+[AP]M)$', text)
     if extra_match:
         formatted += f"\n\n{extra_match.group(1)}"
@@ -54,8 +54,6 @@ client = TelegramClient(StringSession(session), api_id, api_hash)
 async def handler(event):
     msg = event.message
     original_text = msg.text or ""
-
-    # پەیامەکە بە شێوازی نوێ دەگۆڕدرێت
     new_text = format_card_data(original_text)
 
     if msg.media:
