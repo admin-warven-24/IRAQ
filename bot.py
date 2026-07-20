@@ -18,7 +18,7 @@ def format_card_data(text):
         cc, month, year, cvv = cc_match.groups()
         bin_num = cc[:6]
     else:
-        # ئەگەر کارت نەدۆزرایەوە، سەرپەڕ و کۆتایی بە ناوی نوێ
+        # ئەگەر کارت نەدۆزرایەوە، سەرپەڕ و کۆتایی بە ناوی خوازراو
         return f"KURD Scrapper by @warven_24\n\n{text}\n\nDeveloped By @warven_24"
 
     # دەرهێنانی Bank, Country, Type
@@ -30,7 +30,7 @@ def format_card_data(text):
     country = country_match.group(1).strip() if country_match else "N/A"
     card_type = type_match.group(1).strip() if type_match else "N/A"
 
-    # فۆرماتی نوێ، تەنها ناوی `@warven_24` لە سەرپەڕ و کۆتاییدا
+    # فۆرماتی خوازراو (تەنها دەق، بەبێ لینک)
     formatted = f"""KURD Scrapper by @warven_24
 
 CC: `{cc}|{month}|{year}|{cvv}`
@@ -41,7 +41,7 @@ Type: {card_type}
 
 Developed By @warven_24"""
 
-    # ئەگەر کات لە کۆتاییدا هەبوو، زیادیشی بکە
+    # ئەگەر کات لە کۆتاییدا هەبوو، زیادیشی بکە (بەبێ لینک)
     extra_match = re.search(r'(\d+\s+\d+:\d+\s+[AP]M)$', text)
     if extra_match:
         formatted += f"\n\n{extra_match.group(1)}"
@@ -54,14 +54,22 @@ client = TelegramClient(StringSession(session), api_id, api_hash)
 async def handler(event):
     msg = event.message
     original_text = msg.text or ""
-    new_text = format_card_data(original_text)
 
+    # ========== فلترکردن ==========
+    # 1. ئەگەر میدیا (وێنە/ڤیدیۆ/فایل) هەبوو، پشتگوێی بخرێت
     if msg.media:
-        data = await msg.download_media(file=bytes)
-        await client.send_file(TARGET_CHANNEL, data, caption=new_text)
-    else:
-        await client.send_message(TARGET_CHANNEL, new_text)
+        return
+    
+    # 2. ئەگەر لینک (URL) لە ناو دەقەکەدا هەبوو، پشتگوێی بخرێت
+    url_pattern = r'https?://[^\s]+|www\.[^\s]+|t\.me/[^\s]+|telegram\.me/[^\s]+'
+    if re.search(url_pattern, original_text):
+        return
+    # ================================
 
-print("Bot is running...")
+    # پەیامەکە بپڕۆسێسە و بنێرە (تەنها دەق، بەبێ میدیا)
+    new_text = format_card_data(original_text)
+    await client.send_message(TARGET_CHANNEL, new_text)
+
+print("Bot is running... (تەنها پەیامی تێکستی بەبێ لینک و وێنە دەنێردرێت)")
 client.start()
 client.run_until_disconnected()
